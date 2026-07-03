@@ -21,12 +21,14 @@ const religiousPlaceRoutes = require("./routes/religiousPlaceRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const festivalRoutes = require("./routes/festivalRoutes");
 const policeStationRoutes = require("./routes/policeStationRoutes");
+const otherPlaceRoutes = require("./routes/otherPlaceRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/religious-places", religiousPlaceRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/festival-permissions", festivalRoutes);
 app.use("/api/police-stations", policeStationRoutes);
+app.use("/api/other-places", otherPlaceRoutes);
 
 // Home Route
 app.get("/", (req, res) => {
