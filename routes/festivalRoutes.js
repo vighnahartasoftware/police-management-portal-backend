@@ -23,10 +23,29 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/", verifyToken, upload.single("photo"), createFestivalPermission);
+// Create Festival Permission
+router.post(
+  "/",
+  verifyToken,
+  upload.single("photo"),
+  createFestivalPermission
+);
+
+// Get All Festival Permissions
 router.get("/", verifyToken, getFestivalPermissions);
+
+// Get Single Festival Permission
 router.get("/:id", verifyToken, getSingleFestivalPermission);
-router.put("/:id", verifyToken, updateFestivalPermission);
+
+// Update Festival Permission
+router.put(
+  "/:id",
+  verifyToken,
+  upload.single("photo"),
+  updateFestivalPermission
+);
+
+// Delete Festival Permission
 router.delete("/:id", verifyToken, deleteFestivalPermission);
 
 module.exports = router;

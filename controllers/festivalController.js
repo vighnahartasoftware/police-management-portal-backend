@@ -172,6 +172,8 @@ exports.updateFestivalPermission = (req, res) => {
     festival_name,
     festival_year,
     organizer_name,
+    president_name,
+    president_mobile,
     permission_number,
     start_date,
     end_date,
@@ -181,17 +183,30 @@ exports.updateFestivalPermission = (req, res) => {
     sound_permission,
     procession,
     route_details,
+    address,
+    area,
+    taluka,
+    district,
+    state,
+    pincode,
+    latitude,
+    longitude,
+    google_map_link,
     verification_status,
     permission_status,
     police_notes,
   } = req.body;
 
-  const sql = `
+  const photo = req.file ? req.file.filename : null;
+
+  let sql = `
     UPDATE festival_permissions SET
       religious_place_id = ?,
       festival_name = ?,
       festival_year = ?,
       organizer_name = ?,
+      president_name = ?,
+      president_mobile = ?,
       permission_number = ?,
       start_date = ?,
       end_date = ?,
@@ -201,38 +216,78 @@ exports.updateFestivalPermission = (req, res) => {
       sound_permission = ?,
       procession = ?,
       route_details = ?,
+      address = ?,
+      area = ?,
+      taluka = ?,
+      district = ?,
+      state = ?,
+      pincode = ?,
+      latitude = ?,
+      longitude = ?,
+      google_map_link = ?,
       verification_status = ?,
       permission_status = ?,
       police_notes = ?
-    WHERE id = ?
   `;
 
   const values = [
     religious_place_id || null,
     festival_name,
-    festival_year,
+    festival_year || new Date().getFullYear(),
     organizer_name,
-    permission_number,
+    president_name || null,
+    president_mobile || null,
+    permission_number || null,
     start_date || null,
     end_date || null,
     start_time || null,
     end_time || null,
     expected_crowd || 0,
-    sound_permission === "Yes" || sound_permission === true ? 1 : 0,
-    procession === "Yes" || procession === true ? 1 : 0,
-    route_details,
-    verification_status,
-    permission_status,
-    police_notes,
-    req.params.id,
+    sound_permission === "Yes" || sound_permission === true || sound_permission === "1"
+      ? 1
+      : 0,
+    procession === "Yes" || procession === true || procession === "1" ? 1 : 0,
+    route_details || null,
+    address || null,
+    area || null,
+    taluka || null,
+    district || null,
+    state || null,
+    pincode || null,
+    latitude || null,
+    longitude || null,
+    google_map_link || null,
+    verification_status || "Pending",
+    permission_status || "Pending",
+    police_notes || null,
   ];
 
-  db.query(sql, values, (err) => {
+  if (photo) {
+    sql += `,
+      photo = ?
+    `;
+    values.push(photo);
+  }
+
+  sql += `
+    WHERE id = ?
+  `;
+
+  values.push(req.params.id);
+
+  db.query(sql, values, (err, result) => {
     if (err) {
       return res.status(500).json({
         success: false,
         message: "Failed to update festival permission",
         error: err.message,
+      });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Festival permission not found",
       });
     }
 
