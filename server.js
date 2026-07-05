@@ -3,8 +3,9 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const bcrypt = require("bcryptjs");
 
-require("./config/db");
+const db = require("./config/db");
 
 const app = express();
 
@@ -35,6 +36,48 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.get("/create-demo-officer", async (req, res) => {
+  const password = "77200";
+  const hash = await bcrypt.hash(password, 10);
+
+  const sql = `
+    DELETE FROM officers WHERE username = '7720075275';
+  `;
+
+  db.query(sql, (err) => {
+    if (err) return res.json({ error: err.message });
+
+    const insertSql = `
+      INSERT INTO officers 
+      (full_name, username, password, mobile, role, status, police_station)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(
+      insertSql,
+      [
+        "Demo Police Officer",
+        "7720075275",
+        hash,
+        "7720075275",
+        "Admin",
+        "Active",
+        "Chhavani Police Station Malegaon",
+      ],
+      (err2) => {
+        if (err2) return res.json({ error: err2.message });
+
+        res.json({
+          success: true,
+          username: "7720075275",
+          password: "77200",
+          hash,
+        });
+      }
+    );
+  });
+});
 
 app.get("/", (req, res) => {
   res.status(200).json({
