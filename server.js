@@ -8,14 +8,24 @@ require("./config/db");
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://police-management-portal-frontend.vercel.app",
+  process.env.FRONTEND_URL,
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Routes
 const authRoutes = require("./routes/authRoutes");
 const religiousPlaceRoutes = require("./routes/religiousPlaceRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
@@ -30,7 +40,6 @@ app.use("/api/festival-permissions", festivalRoutes);
 app.use("/api/police-stations", policeStationRoutes);
 app.use("/api/other-places", otherPlaceRoutes);
 
-// Home Route
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
