@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 
 exports.loginOfficer = (req, res) => {
-  const { username, password } = req.body;
+  const username = String(req.body.username || "").trim();
+  const password = String(req.body.password || "").trim();
 
   if (!username || !password) {
     return res.status(400).json({
@@ -16,8 +17,16 @@ exports.loginOfficer = (req, res) => {
 
   db.query(sql, [username], async (err, results) => {
     if (err) {
-      return res.status(500).json({ success: false, message: "Server error" });
+      console.error("Login SQL Error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Server error",
+        error: err.message,
+      });
     }
+
+    console.log("LOGIN USERNAME:", username);
+    console.log("DB RESULT COUNT:", results.length);
 
     if (results.length === 0) {
       return res.status(401).json({
@@ -29,6 +38,8 @@ exports.loginOfficer = (req, res) => {
     const officer = results[0];
 
     const isMatch = await bcrypt.compare(password, officer.password);
+
+    console.log("PASSWORD MATCH:", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({
